@@ -14,4 +14,4 @@ async def start_ddos(url: str, loopNum: int):
             print(err)
 
 
-# asyncio.run(ping("http://www.google.com", 100))
+# asyncio.run(start_ddos("http://www.google.com", 100))

@@ -18,104 +18,41 @@ class DiscordClient(discord.Client):
 
     async def setup_hook(self):
         await self.tree.sync()
-        await self.tree.sync(guild_id1)
+        await self.tree.sync(guild=guild_id1)
 
 
 client = DiscordClient(intents=discord.Intents.all())
 
-dbGroup = app_commands.Group(name="config", description="configuration de la base de données",
+dbGroup = app_commands.Group(name="request", description="configuration de la base de données",
                              default_permissions=discord.Permissions(administrator=True))
 
 
-# async def table_autocomplete(interaction: discord.Interaction, current: str):
-#     connexion = db.connect("./database/db.sqlite")
-#     cursor = connexion.cursor()
-#     cursor.execute(f"SELECT * FROM {current}")
-#     result = cursor.fetchone()
-#     return [
-#         app_commands.Choice(name=table_name, value=table_name)
-#         for table_name in result
-#     ]
-
-# @dbGroup.command(name="custom_request", description="make a request to the database")
-# @app_commands.autocomplete(table=table_autocomplete)
-# @app_commands.describe(request_type="the request type", table="the table name", input_field="the values, if any")
-# @app_commands.choices(request_type=[
-#     app_commands.Choice(name="Insert", value="INSERT"),
-#     app_commands.Choice(name="Select", value="SELECT"),
-#     app_commands.Choice(name="Update", value="UPDATE"),
-#     app_commands.Choice(name="Delete", value="DELETE"),
-#     app_commands.Choice(name="Create", value="CREATE"),
-#     app_commands.Choice(name="Drop", value="DROP")
-# ])
-# async def custom_request(interaction: discord.Interaction, request_type: app_commands.Choice[str], query: str, table: str, input_field: Optional[str]):
-#     connexion = db.connect("./database/db.sqlite")
-#     cursor = connexion.cursor()
-#     msg = ""
-#     request = ""
-#     match request_type.value:
-#         case "INSERT":
-#             if type(input_field) == str:
-#                 request = f"INSERT INTO {table} VALUES ({input_field})"
-#                 cursor.execute(request)
-#                 connexion.commit()
-#                 connexion.close()
-#             if type(input_field) == None:
-#                 msg = "Veuillez renseigner une valeur"
-#         case "SELECT":
-#             if type(input_field) == str:
-#                 request = f"SELECT {query} FROM {table} WHERE {input_field}"
-#                 result = cursor.execute(request)
-#             if result:
-#                 for row in result:
-#                     await interaction.response.send_message(row)
-#             connexion.close()
-
-#         case "UPDATE":
-#             if type(input_field) == str:
-#                 request = f"UPDATE {table} SET {input_field}"
-
-#             if type(input_field) == None:
-#                 msg = "Veuillez renseigner une valeur"
-#         case "DELETE":
-#             if type(input_field) == str:
-#                 request = f"DELETE FROM {table} WHERE {input_field}"
-
-#             if type(input_field) == None:
-#                 msg = "Veuillez renseigner une valeur"
-
-#         case "CREATE":
-#             if type(input_field) == str:
-#                 request = f"CREATE TABLE IF NOT EXISTS {table} ({input_field})"
-
-#             if type(input_field) == None:
-#                 msg = "Veuillez renseigner une valeur"
-
-#         case "DROP":
-#             if type(input_field) == str:
-#                 request = f"DROP TABLE IF EXISTS {table}"
-#                 msg = ""
-
-#             if type(input_field) == None:
-#                 msg = "Veuillez renseigner une valeur"
-
-#     if type(input_field) != None:
-#         try:
-#             cursor.execute(request)
-#         except db.Error as err:
-#             msg = str(err)
-#         else:
-#             msg = ""
-#             connexion.commit()
-#             connexion.close()
-#         finally:
-#             await interaction.response.send_message(msg)
+async def table_autocomplete(interaction: discord.Interaction, current: str):
+    connexion = db.connect("./database/db.sqlite")
+    cursor = connexion.cursor()
+    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table'")
+    result = cursor.fetchone()
+    return [
+        app_commands.Choice(name=table_name, value=table_name)
+        for table_name in result
+    ]
 
 
+@dbGroup.command(name="select", description="make a select request to the database")
+@app_commands.describe(request_type="the request type", table="the table name", input_field="the values, if any")
+@app_commands.autocomplete(table=table_autocomplete)
+async def select_request(interaction: discord.Interaction, query: str, table: str, input_field: str, condition: Optional[str]):
+    conneion = db.connect("./database/db.sqlite")
+    cursor = conneion.cursor()
+    request = f"SELECT {query} FROM {table}"
+    if input_field and condition:
+        request += f" WHERE {input_field} = {condition}"
+    cursor.execute(request)
+    response = cursor.fetchone()
+    await interaction.response.send_message(response, ephemeral=True)
 
 
-
-
+@client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
 
@@ -124,7 +61,7 @@ if __name__ == "__main__":
     connexion = db.connect("./database/db.sqlite")
     cursor = connexion.cursor()
     requests = [
-        "CREATE TABLE IF NOT EXISTS MailsConfig (MailsBody STRING NOT NULL DEFAULT \"Bonjour\", MailsSubject STRING NOT NULL \"Agrandir votre b*\")"
+        "CREATE TABLE IF NOT EXISTS config (queries STRING)"
     ]
 
     for request in requests:
