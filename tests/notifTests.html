@@ -8,37 +8,35 @@
 </head>
 
 <body>
-    <script>
-        // Fonction pour demander la permission d'afficher des notifications
-        function demanderPermission() {
-            if (Notification.permission !== "granted") {
-                Notification.requestPermission().then(function (permission) {
+    <script>function notifyMe() {
+            // Let's check if the browser supports notifications
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notification");
+            }
+
+            // Let's check whether notification permissions have alredy been granted
+            else if (Notification.permission === "granted") {
+                // If it's okay let's create a notification
+                const notification = new Notification("Hi there!");
+            }
+
+            // Otherwise, we need to ask the user for permission
+            else if (
+                Notification.permission !== "denied" ||
+                Notification.permission === "default"
+            ) {
+                Notification.requestPermission((permission) => {
+        // If the user accepts, let's create a notification
                     if (permission === "granted") {
-                        afficherNotification();
+                        const notification = new Notification("Hi there!");
                     }
                 });
-            } else {
-                afficherNotification();
             }
+
+                // At last, if the user has denied notifications, and you
+                // want to be respectful there is no need to bother them any more.
         }
-
-        // Fonction pour afficher la notification
-        function afficherNotification() {
-            var notification = new Notification("Bonjour !", {
-                body: "Ceci est un exemple de notification.",
-                icon: "https://www.w3schools.com/howto/img_avatar2.png",
-                tag: "notification-example",
-            });
-
-            // Redirection lorsque la notification est cliquée
-            notification.onclick = function () {
-                window.location.href = "https://example.com";
-            };
-
-            // Masquer la notification après quelques secondes
-            setTimeout(notification.close.bind(notification), 5000);
-        }
-        demanderPermission();
+                    notifyMe();
     </script>
 </body>
 
