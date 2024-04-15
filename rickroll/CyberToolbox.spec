@@ -5,13 +5,14 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('rickroll.mp4', '.')],
+    datas=[('box.ico', '.'), ('rickPog.jpg', '.'), ('rickroll.mp4', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
+    optimize=0,
 )
 pyz = PYZ(a.pure)
 
