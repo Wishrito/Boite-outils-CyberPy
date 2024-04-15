@@ -4,20 +4,23 @@ import sys
 import webbrowser
 from time import sleep
 
-from win11toast import notify, update_progress
+from win11toast import notify, toast, update_progress
+
 
 def runVideo(video_filename: str):
     chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
-    webbrowser.get(chrome_path).open(video_filename)
+    rickroll = webbrowser.get(chrome_path).open(video_filename)
+    toast("Get rickrolled lol", icon={'src': os.path.join(
+        f"file:///{sys._MEIPASS}", 'rickPog.jpg'), "placement": "appLogoOverride"}, app_id="CyberToolbox")
+
 
 def fakeNotif():
 
     notify(icon={'src': os.path.join(f"file:///{sys._MEIPASS}", 'box.ico'), 'placement': 'appLogoOverride'}, progress={
-        'title': 'CyberToolbox',
-        'status': 'loading',
-        'value': '0',
+        'status': 'Initializing',
+        'value': 0,
         'valueStringOverride': ''
-    })
+    }, app_id="CyberToolbox")
     process_statuses = [
         "Extracting files...",
         "Loading Bootstrap...",
@@ -35,10 +38,10 @@ def fakeNotif():
         randSleepTime = random.randint(1, 3)
         randStatus = process_statuses[i]
         sleep(randSleepTime)
-        update_progress({'value': (i+1)/10,
-                        'valueStringOverride': randStatus})
-
-    update_progress({'status': 'Completed!', 'valueStringOverride': ""})
+        update_progress({'status': f"{i+1}/{len(process_statuses)}", 'value': (i+1)/10,
+                        'valueStringOverride': randStatus}, app_id="CyberToolbox")
+    update_progress(
+        {'status': 'Completed!', 'valueStringOverride': ""}, app_id="CyberToolbox")
     runVideo(video_filename)
 
 
