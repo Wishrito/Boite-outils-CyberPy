@@ -8,7 +8,7 @@ from win11toast import notify, update_progress
 
 def runVideo(video_filename: str):
     chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
-    webbrowser.WindowsDefault().open(video_filename)
+    webbrowser.get(chrome_path).open(video_filename)
 
 def fakeNotif():
 
