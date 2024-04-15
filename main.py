@@ -1,71 +1,43 @@
-import asyncio
-import sqlite3 as db
-import tkinter as tk
-from typing import Optional
+import os
+import webbrowser
 
-import discord
-from discord import app_commands
+import flask
+from flask import Request, render_template, request
 
-from sensitive_data import SecurizedClass
-
-guild_id = 1091096575280947404
-guild_id1 = discord.Object(id=guild_id)
-class DiscordClient(discord.Client):
-    def __init__(self, *, intents: discord.Intents):
-        super().__init__(intents=intents)
-
-        self.tree = app_commands.CommandTree(self)
-
-    async def setup_hook(self):
-        await self.tree.sync()
-        await self.tree.sync(guild=guild_id1)
+toolboxApp = flask.Flask(__name__)
+toolboxApp.static_folder = os.path.join(os.path.dirname(__file__), 'src')
+toolboxApp.template_folder = os.path.join(os.path.dirname(__file__), 'pages')
 
 
-client = DiscordClient(intents=discord.Intents.all())
-
-dbGroup = app_commands.Group(name="request", description="configuration de la base de données",
-                             default_permissions=discord.Permissions(administrator=True))
-
-
-async def table_autocomplete(interaction: discord.Interaction, current: str):
-    connexion = db.connect("./database/db.sqlite")
-    cursor = connexion.cursor()
-    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table'")
-    result = cursor.fetchone()
-    return [
-        app_commands.Choice(name=table_name, value=table_name)
-        for table_name in result
-    ]
+@toolboxApp.errorhandler(404)
+def notFound(request: Request):
+    return render_template("404.html"), 404
 
 
-@dbGroup.command(name="select", description="make a select request to the database")
-@app_commands.describe(request_type="the request type", table="the table name", input_field="the values, if any")
-@app_commands.autocomplete(table=table_autocomplete)
-async def select_request(interaction: discord.Interaction, query: str, table: str, input_field: str, condition: Optional[str]):
-    conneion = db.connect("./database/db.sqlite")
-    cursor = conneion.cursor()
-    request = f"SELECT {query} FROM {table}"
-    if input_field and condition:
-        request += f" WHERE {input_field} = {condition}"
-    cursor.execute(request)
-    response = cursor.fetchone()
-    await interaction.response.send_message(response, ephemeral=True)
+@toolboxApp.route("/")
+def hello():
+    """
+    This function is used to show the home.html page.
+
+    :return: the rendered home.html page
+    """
+    return render_template('home.html')
 
 
-@client.event
-async def on_ready():
-    print(f"Logged in as {client.user}")
+@toolboxApp.route("/bruteforce")
+def bruteforce():
+    """
+    This function is used to show the bruteforce.html page.
 
+    :return: the rendered bruteforce.html page
+    """
+    return render_template('bruteforce.html')
 
+# partie système, pas besoind d'y toucher
 if __name__ == "__main__":
-    connexion = db.connect("./database/db.sqlite")
-    cursor = connexion.cursor()
-    requests = [
-        "CREATE TABLE IF NOT EXISTS config (queries STRING)"
-    ]
-
-    for request in requests:
-        cursor.execute(request)
-    connexion.commit()
-    connexion.close()
-    client.run(SecurizedClass().DISCORD_TOKEN)
+    HOST = "127.0.0.1"
+    PORT = 4569
+    url = f"http://{HOST}:{PORT}"
+    print(url)
+    webbrowser.open(url, new=1)
+    toolboxApp.run(host=HOST, port=PORT, debug=True)

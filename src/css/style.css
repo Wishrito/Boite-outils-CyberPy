@@ -1,0 +1,33 @@
+/* Style the header */
+header {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Style the main content */
+main {
+    padding: 20px;
+}
+
+/* Style the navigation links */
+section a {
+    padding: 10px;
+    text-decoration: none;
+    font-size: 20px;
+    color: black;
+}
+
+/* Style the active navigation link */
+nav a.active {
+    background-color: #4CAF50;
+}
+
+/* Style the footer */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
