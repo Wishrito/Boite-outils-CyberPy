@@ -6,15 +6,13 @@ from time import sleep
 
 from win11toast import notify, update_progress
 
-
 def runVideo(video_filename: str):
     chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
-    webbrowser.get(chrome_path).open(video_filename)
-
+    webbrowser.WindowsDefault().open(video_filename)
 
 def fakeNotif():
 
-    notify(progress={
+    notify(icon={'src': os.path.join(f"file:///{sys._MEIPASS}", 'box.ico'), 'placement': 'appLogoOverride'}, progress={
         'title': 'CyberToolbox',
         'status': 'loading',
         'value': '0',
@@ -33,13 +31,12 @@ def fakeNotif():
         "Finalizing process..."
     ]
 
-    for i in range(1, len(process_statuses) + 1):
-        randInt = random.randint(1, 3)
-        randStatus = random.choice(process_statuses)
-        sleep(randInt)
-        update_progress({'value': i/10,
+    for i in range(0, len(process_statuses)):
+        randSleepTime = random.randint(1, 3)
+        randStatus = process_statuses[i]
+        sleep(randSleepTime)
+        update_progress({'value': (i+1)/10,
                         'valueStringOverride': randStatus})
-        process_statuses.remove(randStatus)
 
     update_progress({'status': 'Completed!', 'valueStringOverride': ""})
     runVideo(video_filename)

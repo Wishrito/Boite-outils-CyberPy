@@ -8,35 +8,27 @@
 </head>
 
 <body>
-    <script>function notifyMe() {
-            // Let's check if the browser supports notifications
-            if (!("Notification" in window)) {
-                console.log("This browser does not support desktop notification");
-            }
+    <button onclick="envoyerNotification()">Envoyer Notification</button>
 
-            // Let's check whether notification permissions have alredy been granted
-            else if (Notification.permission === "granted") {
-                // If it's okay let's create a notification
-                const notification = new Notification("Hi there!");
+    <script>
+        function askPermission() {
+            if (Notification.requestPermission() == "granted") {
+                envoyerNotification();
             }
-
-            // Otherwise, we need to ask the user for permission
-            else if (
-                Notification.permission !== "denied" ||
-                Notification.permission === "default"
-            ) {
-                Notification.requestPermission((permission) => {
-        // If the user accepts, let's create a notification
-                    if (permission === "granted") {
-                        const notification = new Notification("Hi there!");
-                    }
-                });
-            }
-
-                // At last, if the user has denied notifications, and you
-                // want to be respectful there is no need to bother them any more.
         }
-                    notifyMe();
+            function envoyerNotification() {
+                fetch('/envoyer-notification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: 'Message de notification' })
+                })
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.error('Erreur:', error));
+            }
+            askPermission();
     </script>
 </body>
 
